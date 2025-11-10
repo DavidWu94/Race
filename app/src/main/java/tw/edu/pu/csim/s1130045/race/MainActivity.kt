@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        //強迫橫式螢幕
+        // 強迫橫式螢幕
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 
         // 隱藏狀態列：獲取 WindowInsetsController，再隱藏statusBars
