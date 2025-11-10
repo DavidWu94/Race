@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "tw.edu.pu.csim.s1130045.race"
-        minSdk = 24
+        minSdk = 25
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"

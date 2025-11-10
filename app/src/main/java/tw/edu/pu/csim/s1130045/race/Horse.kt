@@ -6,10 +6,9 @@ class Horse(n: Int) {
 
     var number = 0
 
-    fun HorseRun(){
+    fun horseRun(){
         number ++
         if (number>3) {number = 0}
         horseX += (10..30).random()
     }
 }
-
