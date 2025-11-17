@@ -47,6 +47,7 @@ fun GameScreen(gameViewModel: GameViewModel) {
                 .padding(top = 16.dp)
         )
 
+
         // 2. 賽馬畫布
         Canvas(modifier = Modifier.fillMaxSize()) {
             // (已刪除 drawCircle)
