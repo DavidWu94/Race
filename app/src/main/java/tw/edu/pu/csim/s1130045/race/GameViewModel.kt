@@ -17,34 +17,45 @@ class GameViewModel: ViewModel() {
     var screenHeightPx by mutableFloatStateOf(0f)
         private set
 
-    // 儲存勝利馬匹的索引 (1, 2, 3)，-1 表示沒有馬獲勝
-    var winningHorseIndex by mutableIntStateOf(-1)
+    // 1. 新增：分數變數
+    var score by mutableIntStateOf(0)
         private set
+
+    // 2. 新增：圓形相關變數
+    var circleX by mutableFloatStateOf(0f)
+    var circleY by mutableFloatStateOf(0f)
+    private var circleSpeedX by mutableFloatStateOf(0f)
+    private var circleSpeedY by mutableFloatStateOf(0f)
+    private val circleRadius = 50f // 圓的半徑
+
+    // 3. 新增：遊戲區域邊界 (避開標題和按鈕)
+    private var topBoundary = 0f
+    private var bottomBoundary = 0f
 
     // 設定螢幕寬度與高度
     fun setGameSize(w: Float, h: Float) {
         screenWidthPx = w
         screenHeightPx = h
+
+        // 設定遊戲邊界 (上方 150f 留給標題和分數，下方 150f 留給按鈕)
+        topBoundary = 150f
+        bottomBoundary = screenHeightPx - 150f
+
         resetGame() // 設置遊戲大小時，重設遊戲
     }
 
     var gameRunning by mutableStateOf(false)
-    val horses = mutableListOf<Horse>()
 
     // 將遊戲重設到初始狀態
     fun resetGame() {
         gameRunning = false
-        winningHorseIndex = -1 // 重設勝利狀態
+        score = 0 // 分數歸零
 
-        horses.clear()
-        // 根據 screenHeightPx 調整馬匹的 Y 座標
-        val horseTrackHeight = (screenHeightPx - 100f) / 3 // 將畫面高度分成3等份 (為標題和按鈕留空間)
-        val startY = 100f // 馬匹起始Y座標 (避開頂部標題)
-
-        for (i in 0..2){
-            // 傳入Y座標
-            horses.add(Horse(i, startY + i * horseTrackHeight))
-        }
+        // 4. 設定圓的初始位置和速度
+        circleX = 150f
+        circleY = 200f
+        circleSpeedX = 15f
+        circleSpeedY = 15f
     }
 
 
@@ -52,28 +63,37 @@ class GameViewModel: ViewModel() {
         // 只有在遊戲未運行時才開始
         if (!gameRunning) {
             gameRunning = true
-            winningHorseIndex = -1 // 新一輪遊戲，重設獲勝者
-
-            // 馬匹回到初始位置
-            for (horse in horses) {
-                horse.horseX = 0
-            }
+            score = 0 // 每次開始都重設分數
 
             viewModelScope.launch {
-                var winnerFound = false
-                while (gameRunning && !winnerFound) { // 每0.1秒循環
-                    delay(100)
+                while (gameRunning) {
+                    delay(20) // 讓動畫更流暢 (20ms)
 
-                    for (i in horses.indices) { // 使用索引來判斷哪匹馬獲勝
-                        val horse = horses[i]
-                        horse.horseRun()
-                        // 馬匹抵達終點線判斷 (留200f給馬匹圖片寬度)
-                        if (horse.horseX >= screenWidthPx - 200) {
-                            winningHorseIndex = i + 1 // 記錄獲勝馬匹，從1開始
-                            winnerFound = true
-                            gameRunning = false // 停止遊戲
-                            break // 有馬獲勝，跳出迴圈
-                        }
+                    // 5. 更新圓的位置
+                    circleX += circleSpeedX
+                    circleY += circleSpeedY
+
+                    // 6. 碰撞邏輯
+                    // 碰到右邊邊界 (要求：分數+1)
+                    if (circleX >= screenWidthPx - circleRadius) {
+                        circleX = screenWidthPx - circleRadius
+                        circleSpeedX *= -1 // 反彈
+                        score++ // 分數+1
+                    }
+                    // 碰到左邊邊界
+                    if (circleX <= circleRadius) {
+                        circleX = circleRadius
+                        circleSpeedX *= -1 // 反彈
+                    }
+                    // 碰到下方邊界
+                    if (circleY >= bottomBoundary - circleRadius) {
+                        circleY = bottomBoundary - circleRadius
+                        circleSpeedY *= -1 // 反彈
+                    }
+                    // 碰到上方邊界
+                    if (circleY <= topBoundary + circleRadius) {
+                        circleY = topBoundary + circleRadius
+                        circleSpeedY *= -1 // 反彈
                     }
                 }
             }
@@ -83,12 +103,6 @@ class GameViewModel: ViewModel() {
     // "結束" 按鈕的功能：停止並重設
     fun stopGame() {
         gameRunning = false // 停止 coroutine 迴圈
-
-        // 馬匹回到初始位置
-        for (horse in horses) {
-            horse.horseX = 0
-        }
-        // 重設獲勝者
-        winningHorseIndex = -1
+        resetGame() // 呼叫重設函式
     }
 }

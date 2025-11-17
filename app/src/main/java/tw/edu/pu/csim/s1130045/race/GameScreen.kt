@@ -13,72 +13,58 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
 fun GameScreen(gameViewModel: GameViewModel) {
 
-    val imageBitmaps = listOf(
-        ImageBitmap.imageResource(R.drawable.horse0),
-        ImageBitmap.imageResource(R.drawable.horse1),
-        ImageBitmap.imageResource(R.drawable.horse2),
-        ImageBitmap.imageResource(R.drawable.horse3)
-    )
+    // (移除了 imageBitmaps 列表)
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Yellow)
+            .background(Color.Yellow) // 背景色
     ) {
-        // 1. 遊戲標題 (置頂)
+        // 1. 遊戲標題 (置頂中央) - 顯示您的姓名
         Text(
-            text = "賽馬遊戲(作者：資管二A 411300459 吳岱威) ", // 讀取 strings.xml 中的 title
+            text = "資管二A 411300459 吳岱威", // 讀取 strings.xml 中的 title
             color = Color.Black,
-            fontSize = 18.sp,
+            fontSize = 24.sp,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(top = 16.dp)
         )
 
-        // 2. 賽馬畫布
+        // 2. 新增：顯示分數 (置頂左方)
+        Text(
+            text = "分數：${gameViewModel.score}", // 顯示分數
+            color = Color.Black,
+            fontSize = 24.sp,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(top = 16.dp, start = 16.dp)
+        )
+
+        // 3. 遊戲畫布
         Canvas(modifier = Modifier.fillMaxSize()) {
-            // (已刪除 drawCircle)
 
-            // 繪製馬匹
-            for (i in 0..2) {
-                val horse = gameViewModel.horses.getOrNull(i) // 使用 getOrNull 防止越界
-                horse?.let {
-                    val imageIndex = it.number.coerceIn(0, imageBitmaps.lastIndex)
-                    drawImage(
-                        image = imageBitmaps[imageIndex],
-                        dstOffset = IntOffset(
-                            it.horseX,
-                            it.horseY
-                        ),
-                        dstSize = IntSize(200, 200) // 馬匹圖片大小
-                    )
-                }
-            }
-        }
-
-        // 3. 顯示勝利文字 (置中)
-        if (gameViewModel.winningHorseIndex != -1) {
-            Text(
-                text = "第${gameViewModel.winningHorseIndex}馬獲勝！",
-                color = Color.Black,
-                fontSize = 40.sp,
-                modifier = Modifier.align(Alignment.Center) // 讓文字在畫面中央
+            // 4. 繪製紅色的圓
+            drawCircle(
+                color = Color.Red,
+                radius = 50f, // 必須與 ViewModel 中的 circleRadius 相同
+                center = Offset(gameViewModel.circleX, gameViewModel.circleY)
             )
+
+            // (移除了繪製馬匹的 for 迴圈)
         }
 
-        // 4. 開始/結束 按鈕 (置底)
+        // (移除了 "第x馬獲勝" 的文字)
+
+        // 5. 開始/結束 按鈕 (置底)
         Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
